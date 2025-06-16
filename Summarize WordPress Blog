@@ -1,0 +1,130 @@
+{
+  "name": "Summarize WordPress Blog",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5ce03e9f-7008-4280-88f8-b6824f1d003a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://miaoli2025.mystagingwebsite.com/wp-json/wp/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "c58d46fc-0d51-4e98-8733-ccc8c2f84151",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "JMonOiDyByyOLJ5s",
+          "name": "Unnamed credential 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst updatedItems = items.map((item) => {\n  const content = item?.json?.content?.rendered;\n  const textContent = content.replace(/<[^>]*>?/gm, \"\");\n  item.json.content.textContent = textContent;\n  return item;\n});\n\nreturn updatedItems;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "2b1249ce-fc77-493a-b46f-039a39d3f3aa",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Summarize the following blog post in 5-6 sentences:\n\n{{ $json.content.textContent }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        660,
+        0
+      ],
+      "id": "b85dcda1-d46a-4feb-b849-1db9f655cefb",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "uOypNCO0vw1XZeIf",
+          "name": "OpenAi account 10"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "834cccb5-1b13-49eb-9e2e-34a9360b2e82",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f318f1eeb582bef69a56797ad1f28184a54cfe51b0e461ee190c5740946ea07e"
+  },
+  "id": "ylxwCb30otzea1h3",
+  "tags": []
+}
